@@ -1,0 +1,43 @@
+# docker-compose up -d
+version: '2'
+services:
+  mysql:
+  # https://hub.docker.com/_/mysql/
+    image: mysql:5.7.18
+    container_name: mysql5
+    volumes:
+      - ~/mysql/files:/root/mysql
+    ports:
+       - "3306:3306"
+    dns:
+      - 172.16.245.10
+    networks:
+      - onap
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+
+  tomcat:
+    image: tomcat:8.0.44-jre8
+    #image: tomcat
+    container_name: tomcat8
+    volumes:
+      - ~/.m2:/root/.m2
+      - .:/root/
+    links:
+      - mysql
+    ports:
+      - "8280:8080"
+      - "9000:9000"
+    dns:
+      - 172.16.245.10
+    networks:
+      - onap
+
+networks:
+  onap:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.245.0/24
+        gateway: 172.16.245.1
